@@ -6,7 +6,6 @@ const AppStore = {
     try {
       const raw = localStorage.getItem(KEY);
       const arr = raw ? JSON.parse(raw) : [];
-      // createdAt を number 化
       return arr.map(x=>({ ...x, createdAt: Number(x.createdAt) })).sort((a,b)=>a.createdAt - b.createdAt);
     } catch {
       return [];
@@ -35,7 +34,6 @@ const AppStore = {
   import(jsonText) {
     const data = JSON.parse(jsonText);
     if (!Array.isArray(data)) throw new Error('invalid');
-    // ざっくりバリデーション
     const cleaned = data.map(x=>({
       id: String(x.id || (Date.now()+Math.random())),
       name: String(x.name || ''),
