@@ -1,0 +1,110 @@
+{\rtf1\ansi\ansicpg932\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!DOCTYPE html>\
+<html lang="ja">\
+<head>\
+  <meta charset="utf-8"/>\
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>\
+  <title>100\uc0\u26412 \u12481 \u12515 \u12524 \u12531 \u12472  \u19968 \u35239 </title>\
+  <style>\
+    :root\{\
+      --color-primary:#22c55e; --color-bg:#0b0b0c; --color-card:#16171a;\
+      --color-text:#f5f7fa; --radius:16px;\
+    \}\
+    body\{margin:0;background:var(--color-bg);color:var(--color-text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto\}\
+    .wrap\{max-width:860px;margin:32px auto;padding:0 16px\}\
+    header\{display:flex;align-items:center;justify-content:space-between;gap:12px\}\
+    a\{color:#9acbff\}\
+    .card\{background:var(--color-card);border:1px solid #24262b;border-radius:var(--radius);padding:20px\}\
+    .tools\{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0\}\
+    input\{width:100%;max-width:320px;padding:10px;border-radius:10px;border:1px solid #2a2d32;background:#0f1012;color:#fff\}\
+    table\{width:100%;border-collapse:separate;border-spacing:0 8px\}\
+    th,td\{padding:12px\}\
+    tr\{background:#141518;border:1px solid #24262b\}\
+    tr td:first-child, tr th:first-child\{border-top-left-radius:12px;border-bottom-left-radius:12px\}\
+    tr td:last-child, tr th:last-child\{border-top-right-radius:12px;border-bottom-right-radius:12px\}\
+    .btn\{cursor:pointer;border:0;border-radius:999px;padding:8px 12px;background:#2a2f35;color:#cbd5e1\}\
+    .btn.del\{background:#3a1f22;color:#ffdfe3\}\
+    .badge\{background:#233126;color:#a7f3d0;border:1px solid #2f4b3a;border-radius:999px;padding:2px 8px;font-size:12px\}\
+  </style>\
+</head>\
+<body>\
+  <div class="wrap">\
+    <header>\
+      <h1 style="margin:0;font-size:20px">100\uc0\u26412 \u12481 \u12515 \u12524 \u12531 \u12472  \u19968 \u35239 </h1>\
+      <a href="index.html">\uc0\u8592  \u12459 \u12454 \u12531 \u12479 \u12540 \u12408 \u25147 \u12427 </a>\
+    </header>\
+\
+    <div class="card" style="margin-top:12px">\
+      <div class="tools">\
+        <input id="q" placeholder="\uc0\u26908 \u32034 \u65288 \u21517 \u21069 \u12395 \u21547 \u12414 \u12428 \u12427 \u25991 \u23383 \u65289 " />\
+        <button class="btn" id="sortNew">\uc0\u26032 \u12375 \u12356 \u38918 </button>\
+        <button class="btn" id="sortOld">\uc0\u21476 \u12356 \u38918 </button>\
+      </div>\
+\
+      <table id="tbl">\
+        <thead>\
+          <tr>\
+            <th style="text-align:left">#</th>\
+            <th style="text-align:left">\uc0\u12450 \u12503 \u12522 \u21517 </th>\
+            <th style="text-align:left">URL</th>\
+            <th style="text-align:left">\uc0\u30331 \u37682 \u26085 \u26178 </th>\
+            <th>\uc0\u25805 \u20316 </th>\
+          </tr>\
+        </thead>\
+        <tbody></tbody>\
+      </table>\
+      <p id="empty" style="opacity:.8">\uc0\u12414 \u12384 \u30331 \u37682 \u12364 \u12354 \u12426 \u12414 \u12379 \u12435 \u12290 </p>\
+    </div>\
+  </div>\
+\
+  <script src="app.js"></script>\
+  <script>\
+    const q = document.getElementById('q');\
+    const tbody = document.querySelector('#tbl tbody');\
+    const empty = document.getElementById('empty');\
+    let sort = 'new'; // 'new' | 'old'\
+\
+    function draw()\{\
+      const list = AppStore.list();\
+      const query = (q.value||'').toLowerCase();\
+      let rows = list.filter(x => x.name.toLowerCase().includes(query));\
+      rows = [...rows].sort((a,b)=> sort==='new' ? (b.createdAt - a.createdAt) : (a.createdAt - b.createdAt));\
+      tbody.innerHTML = '';\
+      rows.forEach((item, idx)=>\{\
+        const tr = document.createElement('tr');\
+        tr.innerHTML = `\
+          <td>$\{idx+1\}</td>\
+          <td>$\{escapeHtml(item.name)\}</td>\
+          <td>$\{item.url ? `<a href="$\{escapeAttr(item.url)\}" target="_blank" rel="noopener">\uc0\u12522 \u12531 \u12463 </a>` : '<span class="badge">URL\u12394 \u12375 </span>'\}</td>\
+          <td>$\{new Date(item.createdAt).toLocaleString()\}</td>\
+          <td><button class="btn del" data-id="$\{item.id\}">\uc0\u21066 \u38500 </button></td>\
+        `;\
+        tbody.appendChild(tr);\
+      \});\
+      empty.style.display = rows.length ? 'none' : 'block';\
+    \}\
+\
+    q.oninput = draw;\
+    document.getElementById('sortNew').onclick = ()=>\{sort='new'; draw();\}\
+    document.getElementById('sortOld').onclick = ()=>\{sort='old'; draw();\}\
+    tbody.addEventListener('click', (e)=>\{\
+      const btn = e.target.closest('button.del');\
+      if (!btn) return;\
+      const id = btn.getAttribute('data-id');\
+      if (confirm('\uc0\u21066 \u38500 \u12375 \u12414 \u12377 \u12363 \u65311 ')) \{ AppStore.remove(id); draw(); \}\
+    \});\
+\
+    function escapeHtml(s)\{return s.replace(/[&<>"'`=\\/]/g, c=>(\{ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' \}[c]))\}\
+    function escapeAttr(s)\{return s.replace(/"/g,'&quot;')\}\
+\
+    draw();\
+  </script>\
+</body>\
+</html>\
+}
