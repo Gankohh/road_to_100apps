@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>100本チャレンジ 一覧</title>
   <style>
-    :root{
-      --color-primary:#22c55e; --color-bg:#0b0b0c; --color-card:#16171a;
-      --color-text:#f5f7fa; --radius:16px;
-    }
+    :root{ --color-primary:#22c55e; --color-bg:#0b0b0c; --color-card:#16171a; --color-text:#f5f7fa; --radius:16px; }
     body{margin:0;background:var(--color-bg);color:var(--color-text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto}
     .wrap{max-width:860px;margin:32px auto;padding:0 16px}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -61,7 +58,7 @@
     const q = document.getElementById('q');
     const tbody = document.querySelector('#tbl tbody');
     const empty = document.getElementById('empty');
-    let sort = 'new'; // 'new' | 'old'
+    let sort = 'new';
 
     function draw(){
       const list = AppStore.list();
@@ -82,7 +79,6 @@
       });
       empty.style.display = rows.length ? 'none' : 'block';
     }
-
     q.oninput = draw;
     document.getElementById('sortNew').onclick = ()=>{sort='new'; draw();}
     document.getElementById('sortOld').onclick = ()=>{sort='old'; draw();}
@@ -92,10 +88,8 @@
       const id = btn.getAttribute('data-id');
       if (confirm('削除しますか？')) { AppStore.remove(id); draw(); }
     });
-
     function escapeHtml(s){return s.replace(/[&<>"'`=\/]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' }[c]))}
     function escapeAttr(s){return s.replace(/"/g,'&quot;')}
-
     draw();
   </script>
 </body>
