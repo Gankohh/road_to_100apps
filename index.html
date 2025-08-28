@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>100本チャレンジ カウンター</title>
   <style>
-    :root{
-      --color-primary:#22c55e; /* vibe: lively green */
-      --color-bg:#0b0b0c;
-      --color-card:#16171a;
-      --color-text:#f5f7fa;
-      --radius:16px;
-      --motion:160ms;
-    }
+    :root{ --color-primary:#22c55e; --color-bg:#0b0b0c; --color-card:#16171a; --color-text:#f5f7fa; --radius:16px; --motion:160ms; }
     *{box-sizing:border-box} body{margin:0;background:var(--color-bg);color:var(--color-text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     .wrap{max-width:720px;margin:32px auto;padding:0 16px}
     header{display:flex;align-items:center;gap:12px;justify-content:space-between}
@@ -22,7 +15,7 @@
     label{display:block;font-weight:600;margin:12px 0 6px}
     input{width:100%;padding:12px;border-radius:12px;border:1px solid #2a2d32;background:#0f1012;color:var(--color-text)}
     .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
-    button{cursor:pointer;border:0;border-radius:999px;padding:12px 18px;background:var(--color-primary);color:#08150b;font-weight:700;transition:transform var(--motion) ease,opacity var(--motion) ease}
+    button{cursor:pointer;border:0;border-radius:999px;padding:12px 18px;background:var(--color-primary);color:#08150b;font-weight:700;transition:transform var(--motion) ease}
     button:active{transform:translateY(1px)}
     .ghost{background:#2a2f35;color:#cbd5e1}
     .inline-help{opacity:.8;font-size:13px}
@@ -33,128 +26,9 @@
     .item{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:10px 12px;border:1px solid #2a2d32;border-radius:12px}
     .item a{text-decoration:none}
     .muted{opacity:.7}
-    footer{margin-top:16px;display:flex;gap:12px;flex-wrap:wrap}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>100本チャレンジ カウンター</h1>
-      <a href="list.html">一覧を見る →</a>
-    </header>
-
-    <div class="card" style="margin-top:12px">
-      <div class="count"><span id="count">0</span> / 100</div>
-      <div class="bar" aria-label="進捗バー"><div id="bar"></div></div>
-      <p id="goal" class="inline-help">100本中 0本達成！</p>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <label for="name">アプリ名</label>
-      <input id="name" placeholder="例）爆発するだけボタン v1" />
-      <label for="url">URL（任意・公開先のリンク）</label>
-      <input id="url" placeholder="例）https://username.github.io/explode-button" />
-      <div class="row">
-        <button id="addBtn">登録してカウント＋1</button>
-        <button class="ghost" id="resetBtn" title="全データ削除に近い操作です">リセット（全部消す）</button>
-        <button class="ghost" id="exportBtn">エクスポート</button>
-        <button class="ghost" id="importBtn">インポート</button>
-      </div>
-      <p class="inline-help">※データはこのブラウザの <code>localStorage</code> に保存されます（同一ドメイン内）。</p>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <h2 style="margin:0 0 8px;font-size:16px">直近の登録（5件）</h2>
-      <div class="grid" id="recent"></div>
-    </div>
-
-    <footer>
-      <span class="muted">Tip: GitHub Pages や Vercel にそのまま上げれば無料公開できます。</span>
-    </footer>
-  </div>
-
-  <script src="app.js"></script>
-  <script>
-    const nameInput = document.getElementById('name');
-    const urlInput  = document.getElementById('url');
-    const addBtn    = document.getElementById('addBtn');
-    const resetBtn  = document.getElementById('resetBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const countEl   = document.getElementById('count');
-    const goalEl    = document.getElementById('goal');
-    const barEl     = document.getElementById('bar');
-    const recentEl  = document.getElementById('recent');
-
-    function render() {
-      const list = AppStore.list();
-      countEl.textContent = list.length;
-      goalEl.textContent = `100本中 ${list.length}本達成！`;
-      barEl.style.width = Math.min(100, (list.length)) + '%';
-
-      // recent 5
-      recentEl.innerHTML = '';
-      [...list].slice(-5).reverse().forEach(item=>{
-        const div = document.createElement('div');
-        div.className = 'item';
-        const left = document.createElement('div');
-        left.innerHTML = `<strong>${escapeHtml(item.name)}</strong><div class="muted" style="font-size:12px">${new Date(item.createdAt).toLocaleString()}</div>`;
-        const right = document.createElement('div');
-        if (item.url) {
-          const a = document.createElement('a');
-          a.href = item.url; a.target = '_blank'; a.rel='noopener noreferrer';
-          a.textContent = 'ひらく';
-          right.appendChild(a);
-        } else {
-          right.innerHTML = '<span class="muted">URLなし</span>';
-        }
-        div.appendChild(left); div.appendChild(right);
-        recentEl.appendChild(div);
-      });
-    }
-
-    addBtn.onclick = ()=>{
-      const name = nameInput.value.trim();
-      const url  = urlInput.value.trim();
-      if (!name) { alert('アプリ名を入れてね！'); nameInput.focus(); return; }
-      AppStore.add({ name, url });
-      nameInput.value=''; urlInput.value='';
-      render();
-    };
-
-    resetBtn.onclick = ()=>{
-      if (confirm('本当に全部消しますか？（元に戻せません）')) {
-        AppStore.clear();
-        render();
-      }
-    };
-
-    exportBtn.onclick = ()=>{
-      const blob = new Blob([AppStore.export()], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'apps100_backup.json'; a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    importBtn.onclick = async ()=>{
-      const input = document.createElement('input');
-      input.type='file'; input.accept='application/json';
-      input.onchange = async ()=>{
-        const file = input.files?.[0]; if(!file) return;
-        const text = await file.text();
-        try{
-          AppStore.import(text);
-          render();
-          alert('インポート完了！');
-        }catch(e){ alert('インポート失敗：JSON形式を確認してください'); }
-      };
-      input.click();
-    };
-
-    function escapeHtml(s){return s.replace(/[&<>"'`=\/]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' }[c]))}
-
-    render();
-  </script>
-</body>
-</html>
