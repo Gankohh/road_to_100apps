@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>100本チャレンジ カウンター</title>
+  <title>アプリ100本チャレンジ カウンター</title>
   <style>
     :root{ --color-primary:#22c55e; --color-bg:#0b0b0c; --color-card:#16171a; --color-text:#f5f7fa; --radius:16px; --motion:160ms; }
     *{box-sizing:border-box} body{margin:0;background:var(--color-bg);color:var(--color-text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
@@ -56,14 +56,12 @@
     </div>
 
     <div class="card" style="margin-top:12px">
-      <h2 style="margin:0 0 8px;font-size:16px">直近の登録（5件）</h2>
+      <h2 id="recentTitle" style="margin:0 0 8px;font-size:16px">直近の登録（0件）</h2>
       <div class="grid" id="recent"></div>
     </div>
   </div>
 
-  <!-- 1) まず外部JSを読み込む -->
   <script src="app.js"></script>
-  <!-- 2) 次にページ用スクリプト。順番大事！ -->
   <script>
     const nameInput = document.getElementById('name');
     const urlInput  = document.getElementById('url');
@@ -75,14 +73,25 @@
     const goalEl    = document.getElementById('goal');
     const barEl     = document.getElementById('bar');
     const recentEl  = document.getElementById('recent');
+    const recentTitle = document.getElementById('recentTitle');
 
     function render() {
       const list = AppStore.list();
       countEl.textContent = list.length;
-      goalEl.textContent = `100本中 ${list.length}本達成！`;
-      barEl.style.width = Math.min(100, list.length) + '%';
+      goalEl.textContent  = `100本中 ${list.length}本達成！`;
+      barEl.style.width   = Math.min(100, list.length) + '%';
 
+      // 件数ラベルを動的に更新
+      recentTitle.textContent = `直近の登録（${Math.min(list.length, 5)}件）`;
+
+      // 0件のときの表示
       recentEl.innerHTML = '';
+      if (list.length === 0) {
+        recentEl.innerHTML = '<p class="muted">まだ登録がありません</p>';
+        return;
+      }
+
+      // 直近5件を表示
       [...list].slice(-5).reverse().forEach(item=>{
         const div = document.createElement('div');
         div.className = 'item';
@@ -104,8 +113,9 @@
 
     addBtn.onclick = ()=>{
       const name = nameInput.value.trim();
-      const url  = urlInput.value.trim();
+      let url  = urlInput.value.trim();
       if (!name) { alert('アプリ名を入れてね！'); nameInput.focus(); return; }
+      if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;  // 省略時https付与
       AppStore.add({ name, url });
       nameInput.value=''; urlInput.value='';
       render();
