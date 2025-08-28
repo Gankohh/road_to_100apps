@@ -32,3 +32,112 @@
   <div class="wrap">
     <header>
       <h1>100本チャレンジ カウンター</h1>
+      <a href="list.html">一覧を見る →</a>
+    </header>
+
+    <div class="card" style="margin-top:12px">
+      <div class="count"><span id="count">0</span> / 100</div>
+      <div class="bar" aria-label="進捗バー"><div id="bar"></div></div>
+      <p id="goal" class="inline-help">100本中 0本達成！</p>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <label for="name">アプリ名</label>
+      <input id="name" placeholder="例）爆発するだけボタン v1" />
+      <label for="url">URL（任意）</label>
+      <input id="url" placeholder="https://..." />
+      <div class="row">
+        <button id="addBtn">登録してカウント＋1</button>
+        <button class="ghost" id="resetBtn">リセット（全部消す）</button>
+        <button class="ghost" id="exportBtn">エクスポート</button>
+        <button class="ghost" id="importBtn">インポート</button>
+      </div>
+      <p class="inline-help">※データはこのブラウザの <code>localStorage</code> に保存されます。</p>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2 style="margin:0 0 8px;font-size:16px">直近の登録（5件）</h2>
+      <div class="grid" id="recent"></div>
+    </div>
+  </div>
+
+  <!-- 1) まず外部JSを読み込む -->
+  <script src="app.js"></script>
+  <!-- 2) 次にページ用スクリプト。順番大事！ -->
+  <script>
+    const nameInput = document.getElementById('name');
+    const urlInput  = document.getElementById('url');
+    const addBtn    = document.getElementById('addBtn');
+    const resetBtn  = document.getElementById('resetBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const countEl   = document.getElementById('count');
+    const goalEl    = document.getElementById('goal');
+    const barEl     = document.getElementById('bar');
+    const recentEl  = document.getElementById('recent');
+
+    function render() {
+      const list = AppStore.list();
+      countEl.textContent = list.length;
+      goalEl.textContent = `100本中 ${list.length}本達成！`;
+      barEl.style.width = Math.min(100, list.length) + '%';
+
+      recentEl.innerHTML = '';
+      [...list].slice(-5).reverse().forEach(item=>{
+        const div = document.createElement('div');
+        div.className = 'item';
+        const left = document.createElement('div');
+        left.innerHTML = `<strong>${escapeHtml(item.name)}</strong><div class="muted" style="font-size:12px">${new Date(item.createdAt).toLocaleString()}</div>`;
+        const right = document.createElement('div');
+        if (item.url) {
+          const a = document.createElement('a');
+          a.href = item.url; a.target = '_blank'; a.rel='noopener noreferrer';
+          a.textContent = 'ひらく';
+          right.appendChild(a);
+        } else {
+          right.innerHTML = '<span class="muted">URLなし</span>';
+        }
+        div.appendChild(left); div.appendChild(right);
+        recentEl.appendChild(div);
+      });
+    }
+
+    addBtn.onclick = ()=>{
+      const name = nameInput.value.trim();
+      const url  = urlInput.value.trim();
+      if (!name) { alert('アプリ名を入れてね！'); nameInput.focus(); return; }
+      AppStore.add({ name, url });
+      nameInput.value=''; urlInput.value='';
+      render();
+    };
+
+    resetBtn.onclick = ()=>{
+      if (confirm('本当に全部消しますか？')) { AppStore.clear(); render(); }
+    };
+
+    exportBtn.onclick = ()=>{
+      const blob = new Blob([AppStore.export()], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'apps100_backup.json'; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    importBtn.onclick = async ()=>{
+      const input = document.createElement('input');
+      input.type='file'; input.accept='application/json';
+      input.onchange = async ()=>{
+        const file = input.files?.[0]; if(!file) return;
+        const text = await file.text();
+        try{ AppStore.import(text); render(); alert('インポート完了！'); }
+        catch{ alert('インポート失敗：JSON形式を確認してください'); }
+      };
+      input.click();
+    };
+
+    function escapeHtml(s){return s.replace(/[&<>"'`=\/]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' }[c]))}
+
+    render();
+  </script>
+</body>
+</html>
